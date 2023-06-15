@@ -12,12 +12,18 @@ const TodoSlice=createSlice({
             state.todos=action.payload
         },
         addTodo:(state,action)=>{
+            console.log(action)
             state.todos=[...state.todos,action.payload]
         },
         editTodo:(state,action)=>{
-            state.todos[action.payload.id]=action.payload.text
+            state.todos[action.payload.index]=action.payload
+
+            console.log("aaaa",state.todos)
+
         },
         deleteTodo:(state,action)=>{
+            console.log("aaaa",action.payload)
+
             state.todos=state.todos.filter((_,index)=>index!==action.payload)
         }
     }

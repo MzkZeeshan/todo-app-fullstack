@@ -1,6 +1,6 @@
 import React from "react";
 import Header from "../components/Header";
-import { useTodo } from "../controller/TodoController";
+import  { useTodo } from "../controller/TodoController";
 
 export default function Todo() {
   const {
@@ -10,14 +10,15 @@ export default function Todo() {
     todos,
     setEditText,
     setIsEdit,
-    setTodoDescription,
-    setTodoTitle,
-    todoTitle,
-    todoDescription,
+    setDescription,
+    setTitle,
+    title,
+    description,
     editText,
     isEdit,
     editDescription,
-    setEditDescription
+    setEditDescription,
+    checkedTodos,
   } = useTodo();
 
   return (
@@ -74,7 +75,10 @@ export default function Todo() {
           </div>
         </form> */}
 
-          <form>
+          <form onSubmit={(e)=>{
+               e.preventDefault()
+               addTodos({description,title})
+          }}>
             <div class="grid gap-3 mb-4 md:grid-cols-1">
               <div class="relative">
                 <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -98,16 +102,16 @@ export default function Todo() {
                   placeholder="Enter title"
                   type="text"
                   id="first_name"
-                  value={todoTitle}
-                  onChange={(e) => setTodoTitle(e.target.value)}
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
                   class="block w-full p-3 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   required
                 />
               </div>
               <div>
                 <input
-                  value={todoDescription}
-                  onChange={(e) => setTodoDescription(e.target.value)}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
                   placeholder="Enter Description"
                   type="text"
                   id="first_name"
@@ -116,6 +120,7 @@ export default function Todo() {
               </div>
             </div>
             <button
+        
               type="submit"
               class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
             >
@@ -127,32 +132,33 @@ export default function Todo() {
           {todos.map((v, i) => (
             <h4 key={i}>
               {isEdit === i ? (
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    editTodos({index:i,...v});
+                    setIsEdit(null);
+                    setEditText("");
+                    setEditDescription("")
+                  }}>
               <div className="flex flex-row border justify-between p-5 w-[40vw] rounded-md my-2">
+          
                   <input
                     type="text"
-                    placeholder="Enter Your Todo"
+                    placeholder="title"
                     class="block w-[150px] p-3  text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                     value={editText}
+                    required
                     onChange={(e) => setEditText(e.target.value)}
                   />
                        <input
                     type="text"
-                    placeholder="Enter Your Todo"
+                    placeholder="description"
                     class="block w-[150px] p-3  text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                     value={editDescription}
                     onChange={(e) => setEditDescription(e.target.value)}
                   />
-
               <div>
              <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      editTodos({ id: isEdit, text: editText });
-                      setIsEdit(null);
-                      setEditText("");
-                      setEditDescription("")
-                    }}
-                    type="button"
+                    type="submit"
                     class="px-6 h-9 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-1 py-1 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                   >
                  update
@@ -169,11 +175,14 @@ export default function Todo() {
                     clear
                   </button>
                   </div>
+
                 </div>
+</form>
+
               ) : (
-                <div className="flex flex-row border justify-between p-5 w-[40vw] rounded-md my-2">
+                <div className={`flex flex-row border justify-between p-5 w-[40vw] rounded-md my-2 ${v?.status ? " bg-green-300":" bg-transparent"} `}>
                   <div className="flex  flex-col justify-start">
-                    <h1 className=" font-bold text-xl ">{v.title}</h1>
+                    <h1 className="text-start font-bold text-xl ">{v.title}</h1>
                     <p className="text-xs text-start">{v.description}</p>
                   </div>
 
@@ -200,7 +209,7 @@ export default function Todo() {
 
                   <button
                     onClick={() => {
-                      deleteTodos(i);
+                      deleteTodos({_id:v?._id,index:i});
                     }}
                     type="button"
                     class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-1 py-1 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
@@ -221,10 +230,11 @@ export default function Todo() {
 
                   <button
                     onClick={() => {
-                      deleteTodos(i);
+                      checkedTodos({...v,index:i});
                     }}
+                    disabled={v.status}
                     type="button"
-                    class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-1 py-1 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                    class={`text-white ${v.status ? "bg-gray-700":"bg-blue-700 hover:bg-blue-800"} focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-1 py-1 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800`}
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"

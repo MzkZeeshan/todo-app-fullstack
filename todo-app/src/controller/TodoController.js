@@ -14,48 +14,146 @@ class TodoController {
           axios
               .get(`${BASE_URL}/todo/get`)
               .then(response => {
-                console.log(response.data,"res")
                   resolve(response.data)
               })
               .catch(err => {
                   reject(NETWORK_ERROR);
               });
       })
-  }}
+  }
+
+  static addTodo = (data) => {
+    return new Promise((resolve, reject) => {
+      axios.post(`${BASE_URL}/todo/add`,{
+        title:data?.title,
+        description:data?.description
+      })
+      .then(response => {
+          resolve(response.data)
+      })
+      .catch(err => {
+          reject(NETWORK_ERROR);
+      });
+
+    })
+  }
+
+  static editTodo = (data) => {
+    return new Promise((resolve, reject) => {
+      axios.put(`${BASE_URL}/todo/edit`,{
+        _id:data?._id,
+        title:data?.title,
+        description:data?.description
+      })
+      .then(response => {
+          resolve(response.data)
+      })
+      .catch(err => {
+          reject(NETWORK_ERROR);
+      });
+
+    })
+  }
+
+  static deleteTodo = (data) => {
+    return new Promise((resolve, reject) => {
+      axios.delete(`${BASE_URL}/todo/remove`,{
+        _id:data,
+      })
+      .then(response => {
+          resolve(response.data)
+      })
+      .catch(err => {
+          reject(NETWORK_ERROR);
+      });
+
+    })
+  }
+
+  static checkedTodo = (data) => {
+    return new Promise((resolve, reject) => {
+      axios.put(`${BASE_URL}/todo/edit`,{
+        _id:data,
+        status:true
+      })
+      .then(response => {
+          resolve(response.data)
+      })
+      .catch(err => {
+          reject(NETWORK_ERROR);
+      });
+
+    })
+  }
+}
 
 export default TodoController
 
 export const useTodo = () => {
-  let [todoTitle, setTodoTitle] = useState("");
-  let [todoDescription, setTodoDescription] = useState("");
+  let [title, setTitle] = useState("");
+  let [description, setDescription] = useState("");
   let [isEdit, setIsEdit] = useState(null);
   let [editText, setEditText] = useState("");
   let [editDescription, setEditDescription] = useState("");
-  let [loading,setLoading] = useState(true)
   const dispatch = useDispatch();
   const todos = useSelector((state) => state.TodoSlice.todos);
   const addTodos = (todo) => {
-
+    TodoController.addTodo(todo)
+    .then((data) => {
     dispatch(addTodo(todo));
+    setTitle("")
+    setDescription("")
+
+    })
+    .catch((error) => {
+        console.log(error, 'Error ')
+    })
   };
   const editTodos = (todo) => {
-    dispatch(editTodo(todo));
+    const data={
+      title:editText,
+      description:editDescription,
+      _id:todo._id,
+      index:todo.index,
+      status:todo.status
+    }
+    TodoController.editTodo(data)
+    .then((res) => {
+        dispatch(editTodo(data));
+
+    })
+    .catch((error) => {
+        console.log(error, 'Error ')
+    })
   };
   const deleteTodos = (todo) => {
-    dispatch(deleteTodo(todo));
+    TodoController.deleteTodo(todo._id)
+    .then((data) => {
+    dispatch(deleteTodo(todo.index));
+
+    })
+    .catch((error) => {
+        console.log(error, 'Error ')
+    })
   };
+  const checkedTodos = (todo) => {
+    TodoController.checkedTodo(todo._id)
+    .then((data) => {
+    dispatch(editTodo({...todo,status:true}));
+    })
+    .catch((error) => {
+        console.log(error, 'Error ')
+    })
+  }
 
   useEffect(()=>{
-    setLoading(true)
     TodoController.getTodos()
             .then((data) => {
               console.log("mzkz",data.data)
                 dispatch(getAll(data.data))
-                setLoading(false)
             })
             .catch((error) => {
-                setLoading(false)
-                console.log(error, 'Error in gettingProducts')
+                console.log(error, 'Error')
             })
         },[])
 
@@ -66,15 +164,16 @@ export const useTodo = () => {
     editTodos,
     addTodos,
     deleteTodos,
-    todoDescription,
-    setTodoDescription,
-    todoTitle,
-    setTodoTitle,
+    description,
+    setDescription,
+    title,
+    setTitle,
     isEdit,
     setEditText,
     setIsEdit,
     editText,
     editDescription,
-    setEditDescription
+    setEditDescription,
+    checkedTodos,
   };
 };
