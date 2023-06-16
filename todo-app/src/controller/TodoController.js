@@ -3,7 +3,8 @@ import { addTodo, editTodo, deleteTodo, getAll } from "../store/slices/TodoSlice
 import { useState, useEffect } from "react";
 import axios from "axios";
 const NETWORK_ERROR = "network issue"
-const BASE_URL = "http://localhost:9000"
+// const BASE_URL = "http://localhost:9000"
+const BASE_URL = "https://fef4-20-204-189-45.ngrok-free.app"
 
 
 
@@ -57,9 +58,7 @@ class TodoController {
 
   static deleteTodo = (data) => {
     return new Promise((resolve, reject) => {
-      axios.delete(`${BASE_URL}/todo/remove`,{
-        _id:data,
-      })
+      axios.delete(`${BASE_URL}/todo/remove/${data}`)
       .then(response => {
           resolve(response.data)
       })

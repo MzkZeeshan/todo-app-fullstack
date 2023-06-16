@@ -31,9 +31,9 @@ router.get("/get", async (req, res) => {
     }
   });
 
-  router.delete("/remove", async (req, res) => {
+  router.delete("/remove/:id", async (req, res) => {
     try {
-        const data  =  await Todo.findByIdAndDelete(req.body._id)
+        const data  =  await Todo.findByIdAndDelete(req.params.id)
        res.json({success:true,msg:"successfully deleted",data})
      } catch (err) {
        res.json({ success: false, msg: err?.message,  err});
